@@ -4,16 +4,30 @@ import { Message } from "ai";
 import { cn } from "@/lib/utils";
 import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { getToolDisplayInfo } from "@/lib/utils/tool-messaging";
 
 interface MessageListProps {
   messages: Message[];
   isLoading?: boolean;
 }
 
+// Helper to get user request from message history
+function getUserRequest(messages: Message[], currentMessageIndex: number): string {
+  // Look backward from current message to find the most recent user message
+  for (let i = currentMessageIndex; i >= 0; i--) {
+    if (messages[i]?.role === 'user' && messages[i]?.content) {
+      return messages[i].content;
+    }
+  }
+  // Fallback to looking for any user message
+  const userMessage = messages.find(m => m.role === 'user' && m.content);
+  return userMessage?.content || 'your component';
+}
+
 export function MessageList({ messages, isLoading }: MessageListProps) {
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-4 text-center">
+      <div className="flex flex-col items-center justify-center min-h-full px-4 text-center">
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 mb-4 shadow-sm">
           <Bot className="h-7 w-7 text-blue-600" />
         </div>
@@ -76,17 +90,30 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                             );
                           case "tool-invocation":
                             const tool = part.toolInvocation;
+                            const userRequest = getUserRequest(messages, messages.indexOf(message));
+                            const displayInfo = getToolDisplayInfo(tool.toolName, userRequest, tool.args);
+                            
                             return (
-                              <div key={partIndex} className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-neutral-50 rounded-lg text-xs font-mono border border-neutral-200">
+                              <div key={partIndex} className="inline-flex items-center gap-3 mt-3 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 shadow-sm">
                                 {tool.state === "result" && tool.result ? (
                                   <>
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100">
+                                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-lg">{displayInfo.emoji}</span>
+                                      <span className={cn("text-sm font-medium", displayInfo.color)}>{displayInfo.message}</span>
+                                    </div>
                                   </>
                                 ) : (
                                   <>
-                                    <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100">
+                                      <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-lg">{displayInfo.emoji}</span>
+                                      <span className={cn("text-sm font-medium", displayInfo.color)}>{displayInfo.message}</span>
+                                    </div>
                                   </>
                                 )}
                               </div>

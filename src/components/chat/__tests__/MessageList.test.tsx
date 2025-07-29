@@ -57,6 +57,11 @@ test("MessageList renders messages with parts", () => {
   const messages: Message[] = [
     {
       id: "1",
+      role: "user",
+      content: "Create a card component",
+    },
+    {
+      id: "2",
       role: "assistant",
       content: "",
       parts: [
@@ -78,7 +83,7 @@ test("MessageList renders messages with parts", () => {
   render(<MessageList messages={messages} />);
 
   expect(screen.getByText("Creating your component...")).toBeDefined();
-  expect(screen.getByText("str_replace_editor")).toBeDefined();
+  expect(screen.getByText("Bringing your card to life...")).toBeDefined();
 });
 
 test("MessageList shows content for assistant message with content", () => {
