@@ -20,6 +20,8 @@ npm run dev:daemon   # Start dev server in background, logs to logs.txt
 npm test            # Run all tests with Vitest
 npm run lint        # Run ESLint
 npm run build       # Build for production
+vitest --run        # Run tests once (non-watch mode)
+vitest --ui         # Run tests with UI interface
 ```
 
 ### Database Management
@@ -51,9 +53,10 @@ npm run db:reset             # Reset database (destructive)
 - **API Route** (`src/app/api/chat/route.ts`): Handles AI streaming responses with tool calls
 
 #### 3. AI Tools Integration
-- **str_replace_editor**: File creation and content manipulation
+- **str_replace_editor**: File creation and content manipulation (view, create, str_replace, insert commands)
 - **file_manager**: File operations (rename, delete)
-- Tools defined in `src/lib/tools/`
+- Tools defined in `src/lib/tools/` and integrate with virtual file system
+- AI can manipulate files without writing to disk - all operations are in-memory
 
 #### 4. Component Generation Flow
 1. User input → Chat API → Claude AI
